@@ -2,6 +2,9 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/ollama_lamgchain/index.html",
+      "/posts/debug_chainlit/index.html",
+      "/posts/memo/index.html",
       "/posts/post-with-code/index.html",
       "/posts/welcome/index.html"
     ]

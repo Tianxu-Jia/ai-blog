@@ -13,5 +13,14 @@
   },
   "AI-world.qmd": {
     "AI-world.html": "e3bd81ba"
+  },
+  "posts/memo/index.qmd": {
+    "index.html": "5a45e603"
+  },
+  "posts/debug_chainlit/index.qmd": {
+    "index.html": "c347612f"
+  },
+  "posts/ollama_lamgchain/index.qmd": {
+    "index.html": "aef61143"
   }
 }

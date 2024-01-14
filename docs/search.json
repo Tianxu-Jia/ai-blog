@@ -2,9 +2,9 @@
   {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "myblog",
+    "title": "AI blog",
     "section": "",
-    "text": "Post With Code\n\n\n\n\n\n\nnews\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\n\n\nJan 14, 2024\n\n\nHarlow Malloc\n\n\n\n\n\n\n\n\n\n\n\n\nWelcome To My Blog\n\n\n\n\n\n\nnews\n\n\n\n\n\n\n\n\n\nJan 11, 2024\n\n\nTristan O’Malley\n\n\n\n\n\n\nNo matching items"
+    "text": "Utilising Ollama for Local LLM on Langchain\n\n\n\n\n\n\nollama\n\n\nlangchain\n\n\n\n\n\n\n\n\n\nJan 14, 2024\n\n\nTianxu Jia\n\n\n\n\n\n\n\n\n\n\n\n\nHow to debug Chainlit App like normal Python code\n\n\n\n\n\n\nmemo\n\n\n\n\n\n\n\n\n\nJan 14, 2024\n\n\nTianxu Jia\n\n\n\n\n\n\n\n\n\n\n\n\nMemo\n\n\n\n\n\n\nmemo\n\n\n\n\n\n\n\n\n\nJan 14, 2024\n\n\nTianxu Jia\n\n\n\n\n\n\n\n\n\n\n\n\nPost With Code\n\n\n\n\n\n\nnews\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\n\n\nJan 14, 2024\n\n\nHarlow Malloc\n\n\n\n\n\n\n\n\n\n\n\n\nWelcome To My Blog\n\n\n\n\n\n\nnews\n\n\n\n\n\n\n\n\n\nJan 11, 2024\n\n\nTristan O’Malley\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "AI-world.html",
@@ -47,5 +47,82 @@
     "title": "About",
     "section": "",
     "text": "About this blog"
+  },
+  {
+    "objectID": "posts/memo/index.html",
+    "href": "posts/memo/index.html",
+    "title": "Memo",
+    "section": "",
+    "text": "This is the memo for my own quick reference in my work."
+  },
+  {
+    "objectID": "posts/debug_chainlit/index.html#introduction",
+    "href": "posts/debug_chainlit/index.html#introduction",
+    "title": "How to debug Chainlit App like normal Python code",
+    "section": "1 Introduction",
+    "text": "1 Introduction\nChainlit is an open-source Python framework designed to streamline the development and monitoring of conversational applications. It focuses on building apps that interact with large language models (LLMs) like ChatGPT or Bard, allowing you to easily create interfaces and manage the user experience.\n\nDebugging Chainlit apps presents challenges due to limited breakpoint functionality. The code below shows how to debug it like normal Python code. Once thoroughly tested, integration into the LLM app can proceed."
+  },
+  {
+    "objectID": "posts/debug_chainlit/index.html#code",
+    "href": "posts/debug_chainlit/index.html#code",
+    "title": "How to debug Chainlit App like normal Python code",
+    "section": "2 Code",
+    "text": "2 Code\n\n#!/usr/bin/env python3\n# -*- coding: utf-8 -*-\n\"\"\"\nCreated on Sun Jan 14 09:55:19 2024\n\n@author: txjia\n\"\"\"\n\nfrom autogen import AssistantAgent, UserProxyAgent, GroupChat, GroupChatManager, ConversableAgent\n#from decouple import config\nimport chainlit as cl\n\n\ndef chat_new_message(self, message, sender):\n    cl.run_sync(\n        cl.Message(\n            content=\"\",\n            author=sender.name,\n        ).send()\n    )\n    print(message)\n    print(type(message))\n    #content = message.get(\"content\")\n    content = message\n    cl.run_sync(\n        cl.Message(\n            content=content,\n            author=sender.name,\n        ).send()\n    )\n\n\ndef config_personas():\n    #config_list = [{\n    #    \"model\": \"gpt-3.5-turbo-1106\",  # model name\n    #    \"api_key\": config(\"OPENAI_API_KEY\")  # api key\n    #}]\n    config_list = [\n        {\n            'base_url': \"http://0.0.0.0:8000\", \n            'api_key': \"sk-xxxxxx\",\n            'model': \"gpt-3.5-turbo\",\n        }\n    ]\n\n\n    llm_config = {\n        #\"seed\": 14,  # seed for caching and reproducibility\n        \"config_list\": config_list,  # a list of OpenAI API configurations\n        \"temperature\": 0.7,  # temperature for sampling\n    }\n\n    user_proxy = UserProxyAgent(\n        name=\"Admin\",\n        system_message=\"A human admin. Interact with the planner to discuss the plan. \"\n                       \"Plan execution needs to be approved by this admin.\",\n        code_execution_config=False,\n        max_consecutive_auto_reply=10,\n        llm_config=llm_config,\n        human_input_mode=\"NEVER\"\n    )\n\n    engineer = AssistantAgent(\n        name=\"Engineer\",\n        llm_config=llm_config,\n        system_message='''Engineer. You follow an approved plan. You write python/shell code to solve tasks. Wrap the \n        code in a code block that specifies the script type. The user can't modify your code. So do not suggest \n        incomplete code which requires others to modify. Don't use a code block if it's not intended to be executed by \n        the executor. Don't include multiple code blocks in one response. Do not ask others to copy and paste the result. \n        Check the execution result returned by the executor. If the result indicates there is an error, fix the error and \n        output the code again. Suggest the full code instead of partial code or code changes. If the error can't be fixed \n        or if the task is not solved even after the code is executed successfully, analyze the problem, revisit your \n        assumption, collect additional info you need, and think of a different approach to try.''',\n    )\n\n    planner = AssistantAgent(\n        name=\"Planner\",\n        system_message='''Planner. Suggest a plan. Revise the plan based on feedback from admin and critic, until admin \n        approval. The plan may involve an engineer who can write code and an executor and critic who doesn't write code. \n        Explain the plan first. Be clear which step is performed by an engineer, executor, and critic.''',\n        llm_config=llm_config,\n    )\n\n    executor = AssistantAgent(\n        name=\"Executor\",\n        system_message=\"Executor. Execute the code written by the engineer and report the result.\",\n        code_execution_config={\"last_n_messages\": 3, \"work_dir\": \"feedback\"},\n        llm_config=llm_config,\n    )\n\n    critic = AssistantAgent(\n        name=\"Critic\",\n        system_message=\"Critic. Double check plan, claims, code from other agents and provide feedback.\",\n        llm_config=llm_config,\n    )\n\n    group_chat = GroupChat(agents=[user_proxy, engineer, planner, executor, critic], messages=[], max_round=50)\n    manager = GroupChatManager(groupchat=group_chat, llm_config=llm_config)\n\n    return user_proxy, manager\n\n\ndef start_chat_saas(message, is_test=False):\n    if not is_test:\n        ConversableAgent._print_received_message = chat_new_message\n    user_proxy, manager = config_personas()\n    user_proxy.initiate_chat(manager, message=message)\n\n\nif __name__ == \"__main__\":\n    test_message = (\n        \"I would like to build a simple website that collects feedback from \"\n        \"consumers via forms.  We can just use a flask application that creates an \"\n        \"html website with forms and has a single question if they liked their \"\n        \"customer experience and then keeps that answer.  I need a thank you html \"\n        \"page once they completed the survey.  I then need a html page called \"\n        \"admin that gives a nice table layout of all of the records from the \"\n        \"database.  Just use sqlite3 as the database, keep it simple.  Also use \"\n        \"Bootstrap for the CSS Styling.\")\n    #start_chat_saas(test_message, is_test=True)\n    start_chat_saas(test_message, is_test=True)"
+  },
+  {
+    "objectID": "posts/ollama_lamgchain/index.html#setup",
+    "href": "posts/ollama_lamgchain/index.html#setup",
+    "title": "Utilising Ollama for Local LLM on Langchain",
+    "section": "1 Setup",
+    "text": "1 Setup\n\nDownload and Install Ollama  curl https://ollama.ai/install.sh | sh\nPull the LLM model if needed:  ollama pull llama2:7b-chat\nRun the server:  ollama serve\nSometimes, the server doesn’t need to be run because it has already begun after being installed correctly."
+  },
+  {
+    "objectID": "posts/ollama_lamgchain/index.html#usage-for-chat",
+    "href": "posts/ollama_lamgchain/index.html#usage-for-chat",
+    "title": "Utilising Ollama for Local LLM on Langchain",
+    "section": "2 Usage for Chat",
+    "text": "2 Usage for Chat\n\nfrom langchain.callbacks.manager import CallbackManager\nfrom langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler\nfrom langchain_community.chat_models import ChatOllama\n\nchat_model = ChatOllama(\n    model=\"llama2\",\n)\n\nfrom langchain.schema import HumanMessage\n\nmessages = [HumanMessage(content=\"Tell me about the history of AI\")]\naa = chat_model(messages)\n\nprint(aa.content)\n\nIn some code, we can use ChatOllama replace langchain.chat_models.ChatOpenAI, for example in here"
+  },
+  {
+    "objectID": "posts/ollama_lamgchain/index.html#ollama-complete",
+    "href": "posts/ollama_lamgchain/index.html#ollama-complete",
+    "title": "Utilising Ollama for Local LLM on Langchain",
+    "section": "3 Ollama complete",
+    "text": "3 Ollama complete\n\nfrom langchain.callbacks.manager import CallbackManager\nfrom langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler\nfrom langchain_community.llms import Ollama\n\nllm = Ollama(model=\"llama2\")\n\naa = llm(\"Tell me about the history of AI\")\n\nprint(aa)"
+  },
+  {
+    "objectID": "posts/ollama_lamgchain/index.html#use-ollama-as-embedding-models",
+    "href": "posts/ollama_lamgchain/index.html#use-ollama-as-embedding-models",
+    "title": "Utilising Ollama for Local LLM on Langchain",
+    "section": "4 Use Ollama as Embedding models",
+    "text": "4 Use Ollama as Embedding models\n\nfrom langchain_community.embeddings import OllamaEmbeddings\n\nembeddings = OllamaEmbeddings()\n\ntext = \"This is a test document.\"\n\nquery_result = embeddings.embed_query(text)\nprint(len(query_result))\nprint(query_result[:5])\n\nembedding multiple documents:\n\nfrom langchain_community.embeddings import OllamaEmbeddings\nimport numpy as np\n\nembeddings = OllamaEmbeddings()\n\ntext1 = \"this is a test document\"\ntest2 = \"How are you, Tom\"\ndoc_result = embeddings.embed_documents([text1, test2])\nprint(np.array(doc_result).ndim)\nprint(doc_result[0][:5])\n\n2\n[0.604047954082489, -1.6594250202178955, -0.7071969509124756, 0.1293690800666809, -1.9412391185760498]"
+  },
+  {
+    "objectID": "posts/ollama_lamgchain/index.html#section",
+    "href": "posts/ollama_lamgchain/index.html#section",
+    "title": "Utilising Ollama for Local LLM on Langchain",
+    "section": "5 ",
+    "text": "5"
+  },
+  {
+    "objectID": "posts/ollama_lamgchain/index.html#ollamafunctions",
+    "href": "posts/ollama_lamgchain/index.html#ollamafunctions",
+    "title": "Utilising Ollama for Local LLM on Langchain",
+    "section": "5 OllamaFunctions",
+    "text": "5 OllamaFunctions\nWhile the current range of OllamaFunctions may be limited, Langchain offers an example for JSON-formatted output, demonstrating its potential for specific use cases.\n\nfrom langchain.chains import create_extraction_chain\n\n# Schema\nschema = {\n    \"properties\": {\n        \"name\": {\"type\": \"string\"},\n        \"height\": {\"type\": \"integer\"},\n        \"hair_color\": {\"type\": \"string\"},\n    },\n    \"required\": [\"name\", \"height\"],\n}\n\n# Input\ninput = \"\"\"Alex is 5 feet tall. Claudia is 1 feet taller than Alex and jumps higher than him. Claudia is a brunette and Alex is blonde.\"\"\"\n\n# Run chain\nllm = OllamaFunctions(model=\"mistral\", temperature=0)\nchain = create_extraction_chain(schema, llm)\nchain.run(input)\n\nThe output of the above code:\n[{'name':       'Alex', \n  'height':      5, \n  'hair_color': 'blonde'},\n\n {'name':        'Claudia', \n  'height':       6, \n  'hair_color':  'brunette'}]"
+  },
+  {
+    "objectID": "posts/ollama_lamgchain/index.html",
+    "href": "posts/ollama_lamgchain/index.html",
+    "title": "Utilising Ollama for Local LLM on Langchain",
+    "section": "",
+    "text": "OpenAI debugging is expensive, while using free open-source LLMs during development is cost-effective. This allows delaying the decision between commercial or open-source for deployment.\nOllama makes open-source LLMs shine on Lanchain! This memo outlines the steps for using them seamlessly."
+  },
+  {
+    "objectID": "posts/memo/index.html#how-to-debug-chainlit-app-like-normal-python-code",
+    "href": "posts/memo/index.html#how-to-debug-chainlit-app-like-normal-python-code",
+    "title": "Memo",
+    "section": "1 How to debug Chainlit App like normal Python code",
+    "text": "1 How to debug Chainlit App like normal Python code"
   }
 ]

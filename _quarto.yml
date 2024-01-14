@@ -2,7 +2,7 @@ project:
   type: website
   output-dir: docs
 website:
-  title: "myblog"
+  title: "Tianxu Jia's Breaking the AI Code"
   navbar:
     right:
       - about.qmd

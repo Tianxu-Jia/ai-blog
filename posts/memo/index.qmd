@@ -1,0 +1,15 @@
+---
+title: "Memo"
+author: "Tianxu Jia"
+toc: true
+number-sections: true
+date: today
+categories: [memo]
+---
+
+This is the memo for my own quick reference in my work.
+
+![](memo.jpg)
+
+## How to debug Chainlit App like normal Python code
+

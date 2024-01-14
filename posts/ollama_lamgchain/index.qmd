@@ -1,0 +1,137 @@
+---
+title: "Utilising Ollama for Local LLM on Langchain"
+author: "Tianxu Jia"
+toc: true
+number-sections: true
+date: today
+categories: [ollama, langchain]
+---
+
+![](ollama-langchain.jpg)
+
+OpenAI debugging is expensive, while using free open-source LLMs during development is cost-effective. This allows delaying the decision between commercial or open-source for deployment.
+
+Ollama makes open-source LLMs shine on Lanchain! This memo outlines the steps for using them seamlessly.
+
+## Setup
+- Download and Install Ollama <br>
+        curl https://ollama.ai/install.sh | sh
+
+- Pull the LLM model if needed: <br>
+        ollama pull llama2:7b-chat
+
+- Run the server: <br>
+        ollama serve<br>
+
+    Sometimes, the server doesn't need to be run because it has already begun after being installed correctly. 
+
+## Use for Chat<br>
+```{python}
+#| eval: false
+
+from langchain.callbacks.manager import CallbackManager
+from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
+from langchain_community.chat_models import ChatOllama
+
+chat_model = ChatOllama(
+    model="llama2",
+)
+
+from langchain.schema import HumanMessage
+
+messages = [HumanMessage(content="Tell me about the history of AI")]
+aa = chat_model(messages)
+
+print(aa.content)
+```
+
+In some code, we can use `ChatOllama` replace `langchain.chat_models.ChatOpenAI`, for example over [here](https://docs.chainlit.io/integrations/langchain)
+
+## Use for Complete
+
+```{python}
+#| eval: false
+from langchain.callbacks.manager import CallbackManager
+from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
+from langchain_community.llms import Ollama
+
+llm = Ollama(model="llama2")
+
+aa = llm("Tell me about the history of AI")
+
+print(aa)
+```
+
+## Use Ollama as Embedding Models
+
+```{python}
+#| eval: false
+
+from langchain_community.embeddings import OllamaEmbeddings
+
+embeddings = OllamaEmbeddings()
+
+text = "This is a test document."
+
+query_result = embeddings.embed_query(text)
+print(len(query_result))
+print(query_result[:5])
+
+```
+
+embedding multiple documents:
+
+```{python}
+
+from langchain_community.embeddings import OllamaEmbeddings
+import numpy as np
+
+embeddings = OllamaEmbeddings()
+
+text1 = "this is a test document"
+test2 = "How are you, Tom"
+doc_result = embeddings.embed_documents([text1, test2])
+print(np.array(doc_result).ndim)
+print(doc_result[0][:5])
+
+```
+
+## OllamaFunctions
+
+While the current range of OllamaFunctions may be limited, Langchain offers an example for JSON-formatted output, demonstrating its potential for specific use cases.
+
+
+```{python}
+#| eval: false
+from langchain.chains import create_extraction_chain
+
+# Schema
+schema = {
+    "properties": {
+        "name": {"type": "string"},
+        "height": {"type": "integer"},
+        "hair_color": {"type": "string"},
+    },
+    "required": ["name", "height"],
+}
+
+# Input
+input = """Alex is 5 feet tall. Claudia is 1 feet taller than Alex and jumps higher than him. Claudia is a brunette and Alex is blonde."""
+
+# Run chain
+llm = OllamaFunctions(model="mistral", temperature=0)
+chain = create_extraction_chain(schema, llm)
+chain.run(input)
+
+```
+The output of the above code:
+
+```
+[{'name':       'Alex', 
+  'height':      5, 
+  'hair_color': 'blonde'},
+
+ {'name':        'Claudia', 
+  'height':       6, 
+  'hair_color':  'brunette'}]
+```
