@@ -1,0 +1,17 @@
+{
+  "posts/welcome/index.qmd": {
+    "index.html": "207e0972"
+  },
+  "posts/post-with-code/index.qmd": {
+    "index.html": "2257d3c2"
+  },
+  "about.qmd": {
+    "about.html": "2e43a29e"
+  },
+  "index.qmd": {
+    "index.html": "84d10f61"
+  },
+  "AI-world.qmd": {
+    "AI-world.html": "e3bd81ba"
+  }
+}

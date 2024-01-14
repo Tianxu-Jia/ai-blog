@@ -1,0 +1,15 @@
+---
+title: "AI world"
+image: profile.jpg
+about:
+  template: jolla
+  
+---
+
+## aaa
+About this blog
+
+asfdcsafvdcscvf
+
+## bb
+vfsdfcsa
